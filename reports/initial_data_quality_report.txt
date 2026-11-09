@@ -1,0 +1,22 @@
+Initial Data Quality Report
+==================================================
+
+Missing Values:
+          Missing Count  Missing Percentage
+feature1              0                 0.0
+feature2              0                 0.0
+feature3              0                 0.0
+feature4              0                 0.0
+Label                 0                 0.0
+
+Infinite Values:
+          Infinite Count
+feature1               0
+feature2               0
+feature3               0
+feature4               0
+
+Duplicated Rows: 0
+
+Anomalous Values:
+  No anomalous values found in checked features.

@@ -1,0 +1,6 @@
+Minority-Class Definition
+==================================================
+Total samples: 1118
+Criteria: < 1.0% of total samples OR < 100 absolute count
+Minority attack categories: ['Bot', 'WebAttack', 'DDoS', 'PortScan', 'BruteForce', 'Infiltration']
+Number of minority categories: 6

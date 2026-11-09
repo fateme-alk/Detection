@@ -1,0 +1,189 @@
+# VAEGAN Configuration for CICIDS2017 Network Traffic Detection
+# Skip the Benchmark: Generating System-Level Data using Generative ML
+
+# Data Configuration
+data:
+  data_dir: "./data/CICIDS2017/"
+  csv_files:
+    - "Monday-WorkingHours.pcap_ISCX.csv"
+    - "Tuesday-WorkingHours.pcap_ISCX.csv"
+    - "Wednesday-workingHours.pcap_ISCX.csv"
+    - "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"
+    - "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"
+    - "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+    - "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+    - "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+  
+  # Features to extract (numeric features from flow data)
+  features:
+    - Flow_Duration
+    - Packet_Size_Fliters
+    - Packets_Fwd
+    - Packets_Bwd
+    - Bytes_Fwd
+    - Bytes_Bwd
+    - Flow_IAT_Total
+    - Flow_IAT_Min
+    - Flow_IAT_Max
+    - Flow_IAT_Mean
+    - Flow_IAT_Std
+    - Fwd_IAT_Total
+    - Fwd_IAT_Min
+    - Fwd_IAT_Max
+    - Fwd_IAT_Mean
+    - Fwd_IAT_Std
+    - Bwd_IAT_Total
+    - Bwd_IAT_Min
+    - Bwd_IAT_Max
+    - Bwd_IAT_Mean
+    - Bwd_IAT_Std
+    - Fwd_Packet_Length_Mean
+    - Bwd_Packet_Length_Mean
+    - Flow_Packets_Syn
+    - Flow_Packets_Ack
+    - Flow_Packets_URG
+    - Flow_Packets_FIN
+    - Flow_Packets_RST
+    - Flow_Packets_PSH
+    - FIN_Flag_Count
+    - RST_Flag_Count
+    - PSH_Flag_Count
+    - ACK_Flag_Count
+    - URG_Flag_Count
+    - CWE_Flag_Count
+    - ECE_Flag_Count
+    - Packet_Length_Mean
+    - Packet_Length_Variance
+  
+  # Numeric features with specific transformations
+  feature_transform:
+    Flow_Duration: "log"  # Use log transformation
+    Packet_Size_Fliters: "log"
+    Bwd_Packet_Length_Mean: "quantile"
+    Flow_IAT_Total: "min_max"
+    Packet_Length_Mean: "min_max"
+  
+  # Binary representation config
+  binary:
+    bit_size: 32
+    frac_bits: 12  # Bits for fractional part
+  
+  # Class configuration
+  minority_classes:
+    - "Infiltration"
+    - "WebAttack"
+    - "BruteForce"
+    - "DDoS"
+  
+
+# MLPVAE Model Configuration
+mlp_vae:
+  # Input dimensions (features + label)
+  input_dim: 86  # 64 features + label
+  
+  # Latent space dimension
+  latent_dim: 64
+  
+  # Encoder hidden layers
+  encoder_dims: [128, 64]
+  
+  # Decoder hidden layers
+  decoder_dims: [64, 128]
+  
+  # Training parameters
+  batch_size: 32
+  learning_rate: 0.0001
+  num_epochs: 150
+  beta1: 0.5  # For KL divergence loss
+  
+  # Loss weights
+  loss_weights:
+    reconstruction: 1.0
+    kl_divergence: 0.001
+  
+
+
+# DCGAN Model Configuration
+dcgan:
+  # Number of channels (binary vectors)
+  num_channels: 1
+  
+  # Generator architecture
+  generator:
+    input_dim: 100  # Latent dimension z
+    base_channels: 32
+    hidden_dims: [64, 128, 256]
+    
+  # Discriminator architecture
+  discriminator:
+    input_dim: 1
+    base_channels: 32
+    hidden_dims: [64, 128, 256]
+    
+  # Training parameters
+  generator_lr: 0.0001
+  discriminator_lr: 0.0001
+  batch_size: 32
+  num_epochs: 150
+  
+  # Beta hyperparameters
+  beta1: 0.5
+  beta2: 0.999
+  
+
+
+# Metrics Configuration
+metrics:
+  # MMD (Maximum Mean Discrepancy)
+  mmd:
+    kernel_mul: 2.0
+    kernel_num: 5
+  
+  # Precision-Recall Density (PRD)
+  prd:
+    band_size:
+  
+
+# Training Configuration
+training:
+  # Random seed for reproducibility
+  seed: 42
+  
+  # Device (cuda or cpu)
+  device: "cuda"  # or "cpu"
+  
+  # Validation split
+  valid_size: 0.1
+  
+  # Number of workers for data loading
+  num_workers: 4
+  
+  # Checkpoint save interval
+  save_interval: 10
+  
+  # Enable mixed precision training
+  mixed_precision: true
+  
+  # Logging options
+  log_dir: "./VAEGAN-Implementation/training_log"
+  visualize_interval: 5
+  
+
+
+# Output Configuration
+output:
+  # Directory to save generated synthetic data
+  synthetic_data_dir: "./VAEGAN-Implementation/outputs/synthetic/"
+  
+  # Directory to save model checkpoints
+  model_checkpoint_dir: "./VAEGAN-Implementation/outputs/models/"
+  
+  # Directory to save training figures
+  figures_dir: "./VAEGAN-Implementation/outputs/figures/"
+  
+  # Number of synthetic samples to generate per class
+  synthetic_samples_per_class:
+    Infiltration: 50000
+    WebAttack: 50000
+    BruteForce: 50000
+    DDoS: 50000
